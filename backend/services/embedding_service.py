@@ -71,17 +71,31 @@ class EmbeddingService:
         self._svd = None
         self._init_model()
 
+    
     def _init_model(self):
-        try:
-            from sentence_transformers import SentenceTransformer
-            self._model = SentenceTransformer(self.model_name)
-            self.is_neural = True
-            print(f"[EmbeddingService] Loaded neural SentenceTransformer model: {self.model_name}")
-        except Exception as e:
-            self._model = None
-            self.is_neural = False
-            print(f"[EmbeddingService] SentenceTransformer unavailable ({e}). Initializing scikit-learn TF-IDF + LSA semantic space.")
-            self._init_lsa()
+        use_neural = os.getenv("INTENTALIGN_USE_NEURAL", "0") == "1"
+
+        if use_neural:
+            try:
+                from sentence_transformers import SentenceTransformer
+                self._model = SentenceTransformer(self.model_name)
+                self.is_neural = True
+                print(
+                    f"[EmbeddingService] Loaded neural model: "
+                    f"{self.model_name}"
+                )
+                return
+            except Exception as e:
+                print(
+                    f"[EmbeddingService] Neural model unavailable ({e}). "
+                    "Using TF-IDF + LSA."
+                )
+
+        self._model = None
+        self.is_neural = False
+        print("[EmbeddingService] Using lightweight TF-IDF + LSA.")
+        self._init_lsa()
+
 
     def _init_lsa(self):
         from sklearn.feature_extraction.text import TfidfVectorizer
