@@ -151,7 +151,7 @@ async function initPopup() {
         strictness: 0.65,
 
         backendUrl:
-          "http://127.0.0.1:5000",
+          "https://intentalign-youtube-extension.onrender.com",
 
         feedbackLearningEnabled:
           true,
@@ -301,7 +301,7 @@ if ($("btnNewSession")) {
 
       const backendUrl =
         currentSettings?.backendUrl ||
-        "http://127.0.0.1:5000";
+        "https://intentalign-youtube-extension.onrender.com";
 
 
       try {
@@ -522,7 +522,7 @@ function populateForm(
 
     $("backendUrl").value =
       settings.backendUrl ||
-      "http://127.0.0.1:5000";
+      "https://intentalign-youtube-extension.onrender.com";
   }
 
 }
@@ -868,7 +868,7 @@ if ($("saveProfile")) {
 
       const backendUrl =
         $("backendUrl")?.value.trim() ||
-        "http://127.0.0.1:5000";
+        "https://intentalign-youtube-extension.onrender.com";
 
 
       const strictness =
@@ -1551,7 +1551,7 @@ if ($("saveSettings")) {
         $("backendUrl")
           ?.value
           .trim() ||
-        "http://127.0.0.1:5000";
+        "https://intentalign-youtube-extension.onrender.com";
 
 
       currentSettings = {
@@ -1654,7 +1654,7 @@ if ($("resetSession")) {
 
       const backendUrl =
         currentSettings?.backendUrl ||
-        "http://127.0.0.1:5000";
+        "https://intentalign-youtube-extension.onrender.com";
 
 
       fetch(

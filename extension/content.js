@@ -130,7 +130,7 @@
           enabled: true,
           strictness: 0.65,
           backendUrl:
-            "http://127.0.0.1:5000",
+            "https://intentalign-youtube-extension.onrender.com",
           showBadges: true
         };
 
@@ -342,7 +342,7 @@
 
     const backendUrl =
       settings.backendUrl ||
-      "http://127.0.0.1:5000";
+      "https://intentalign-youtube-extension.onrender.com";
 
     try {
       console.log(
@@ -1880,7 +1880,7 @@ function reorderHomeFeed() {
         await fetch(
           `${
             settings.backendUrl ||
-            "http://127.0.0.1:5000"
+            "https://intentalign-youtube-extension.onrender.com"
           }/api/feedback`,
           {
             method: "POST",

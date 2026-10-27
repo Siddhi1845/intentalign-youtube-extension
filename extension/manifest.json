@@ -8,8 +8,10 @@
     "activeTab"
   ],
   "host_permissions": [
+    "https://intentalign-youtube-extension.onrender.com/*",
     "http://127.0.0.1:5000/*",
-    "http://localhost:5000/*"
+    "http://localhost:5000/*",
+    "https://www.youtube.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
