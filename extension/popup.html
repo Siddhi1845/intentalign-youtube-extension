@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IntentAlign</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-title">IntentAlign</div>
+        <div class="brand-subtitle">AI Feed Intervention for YouTube</div>
+      </div>
+      <div class="header-controls">
+        <span id="backendBadge" class="status-badge offline" title="Backend connection status">Checking...</span>
+        <button id="toggleFiltering" class="toggle-btn active" title="Enable or disable intervention">Active</button>
+      </div>
+    </header>
+
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="tab-intent">Intent Profile</button>
+      <button class="tab-btn" data-tab="tab-analytics">Feed Analytics</button>
+      <button class="tab-btn" data-tab="tab-settings">Settings</button>
+    </nav>
+
+    <!-- SESSION BAR -->
+    <div class="session-bar">
+      <div class="session-info">
+        <span class="session-tag">Session:</span>
+        <span id="sessionTagDisplay" class="session-id-text" title="Active Intent Session ID">default</span>
+      </div>
+      <button id="btnNewSession" class="btn-new-session" title="Start a fresh intent session with isolated stats">+ New Session</button>
+    </div>
+
+    <!-- TAB 1: INTENT PROFILE -->
+    <section id="tab-intent" class="tab-content active">
+      <div class="section-group">
+        <h3 class="section-title">User Profile (Persistent)</h3>
+        <div class="form-field">
+          <label for="profession">Profession / Role</label>
+          <input id="profession" type="text" placeholder="e.g. IT Student, Software Engineer">
+        </div>
+        <div class="form-field">
+          <label for="interests">General Interests</label>
+          <input id="interests" type="text" placeholder="e.g. Artificial Intelligence, Cloud Computing">
+        </div>
+        <div class="form-field">
+          <label for="hobbies">Hobbies</label>
+          <input id="hobbies" type="text" placeholder="e.g. Cricket, Drawing, Chess">
+        </div>
+      </div>
+
+      <div class="section-group">
+        <h3 class="section-title">Current Intent & Goal</h3>
+        <div class="form-field">
+          <label for="goal">Current Goal <span class="req">*</span></label>
+          <textarea id="goal" rows="2" placeholder="e.g. Prepare for DevOps placement interview"></textarea>
+        </div>
+        <div class="form-field">
+          <label for="preferred">Preferred Topics</label>
+          <input id="preferred" type="text" placeholder="e.g. DevOps, Linux, Docker, Kubernetes, AWS">
+        </div>
+        <div class="form-field">
+          <label for="unwanted">Unwanted Topics</label>
+          <input id="unwanted" type="text" placeholder="e.g. Politics, Breaking News, Entertainment">
+        </div>
+        <div class="form-field">
+          <div class="slider-header">
+            <label for="strictness">Intervention Strictness</label>
+            <span id="strictnessVal" class="slider-val">65%</span>
+          </div>
+          <input id="strictness" type="range" min="10" max="95" value="65">
+          <div class="slider-labels">
+            <span>Permissive</span>
+            <span>Balanced</span>
+            <span>Strict</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="saveProfile" class="btn btn-primary">Save & Build Intent Profile</button>
+      </div>
+      <div id="intentStatus" class="status-msg"></div>
+
+      <div id="derivedContainer" class="derived-container hidden">
+        <h4 class="derived-title">Derived Goal Concepts (Editable)</h4>
+        <p class="derived-desc">Extracted automatically from your goal. Click ✕ to remove any topic:</p>
+        <div id="derivedTags" class="tags-wrapper"></div>
+      </div>
+    </section>
+
+    <!-- TAB 2: LIVE FEED ANALYTICS -->
+    <section id="tab-analytics" class="tab-content">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Controlled Alignment</div>
+          <div id="metricAlignment" class="metric-value highlight">--%</div>
+          <div class="metric-sub">Visible (1 - JSD_ctrl)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Raw Alignment</div>
+          <div id="metricRawAlignment" class="metric-value">--%</div>
+          <div class="metric-sub">Raw (1 - JSD_raw)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Alignment Gain (Δ)</div>
+          <div id="metricGain" class="metric-value gain">+0.0%</div>
+          <div class="metric-sub">Net Improvement</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Topic Diversity</div>
+          <div id="metricDiversity" class="metric-value">--</div>
+          <div class="metric-sub">Shannon Entropy H</div>
+        </div>
+      </div>
+
+      <div class="section-group">
+        <h4 class="section-title">Feed Action Summary</h4>
+        <div class="counts-row">
+          <div class="count-pill">Analyzed: <b id="countAnalyzed">0</b></div>
+          <div class="count-pill allow">Allowed: <b id="countAllowed">0</b></div>
+          <div class="count-pill deprioritize">Deprioritized: <b id="countDeprioritized">0</b></div>
+          <div class="count-pill suppress">Suppressed: <b id="countSuppressed">0</b></div>
+        </div>
+        <div class="exposure-bar-container">
+          <div class="bar-header">
+            <span>Preferred: <b id="prefExposureVal">0%</b> <small style="color:var(--text-muted)">(Raw: <span id="rawPrefVal">0%</span>)</small></span>
+            <span>Unwanted: <b id="unwExposureVal">0%</b> <small style="color:var(--text-muted)">(Raw: <span id="rawUnwVal">0%</span>)</small></span>
+          </div>
+          <div class="dual-progress">
+            <div id="prefProgressBar" class="progress-pref" style="width: 0%;"></div>
+            <div id="unwProgressBar" class="progress-unw" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-group">
+        <div class="chart-header-row">
+          <h4 class="section-title" style="margin-bottom: 4px;">3-Way Topic Alignment Distribution</h4>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-dot dot-intent"></span> Target Intent (P)</span>
+            <span class="legend-item"><span class="legend-dot dot-raw"></span> Raw Feed (Q_raw)</span>
+            <span class="legend-item"><span class="legend-dot dot-ctrl"></span> Controlled Feed (Q_ctrl)</span>
+          </div>
+        </div>
+        <div id="chartContainer" class="chart-container">
+          <div class="chart-placeholder">No video cards observed in this session yet. Browse YouTube to generate the observed profile.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: SETTINGS & AUDIT -->
+    <section id="tab-settings" class="tab-content">
+      <div class="section-group">
+        <h4 class="section-title">Intervention Policy</h4>
+        <div class="form-field">
+          <label for="hardNegatives">Hard Negative Topics (Always Suppressed)</label>
+          <input id="hardNegatives" type="text" placeholder="Politics, Celebrity Gossip">
+        </div>
+        <div class="form-field">
+          <label for="softNegatives">Soft Negative Topics (Context-Sensitive)</label>
+          <input id="softNegatives" type="text" placeholder="News, Entertainment, Gaming, Sports">
+        </div>
+        <div class="checkbox-field">
+          <input id="feedbackLearning" type="checkbox" checked>
+          <label for="feedbackLearning">Enable Adaptive Feedback Learning (Gradually tune topic weights)</label>
+        </div>
+        <div class="checkbox-field">
+          <input id="showBadges" type="checkbox" checked>
+          <label for="showBadges">Show Intent Badges & Explanations on YouTube Cards</label>
+        </div>
+      </div>
+
+      <div class="section-group">
+        <h4 class="section-title">Backend Connection</h4>
+        <div class="form-field">
+          <label for="backendUrl">API Endpoint URL</label>
+          <input id="backendUrl" type="text" value="http://127.0.0.1:5000">
+        </div>
+        <div class="actions">
+          <button id="saveSettings" class="btn btn-secondary">Update Settings</button>
+          <button id="resetSession" class="btn btn-outline">Reset Session Data</button>
+        </div>
+      </div>
+
+      <div class="section-group">
+        <h4 class="section-title">User Feedback History</h4>
+        <div id="feedbackList" class="feedback-list">
+          <div class="empty-note">No feedback recorded yet. Use the feedback buttons on YouTube cards to guide the system.</div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <span>IntentAlign v1.0.0 • Manifest V3</span>
+      <span id="sessionStatus">Session: Active</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
